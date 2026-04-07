@@ -1,0 +1,46 @@
+name: harvest_and_hearth
+description: Ứng dụng quản lý thực phẩm thông minh với gợi ý công thức nấu ăn từ AI.
+publish_to: 'none'
+version: 1.0.15+16
+
+environment:
+  sdk: '>=3.6.2 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.2
+  shared_preferences: ^2.3.2
+  http: ^1.2.2
+  google_generative_ai: ^0.4.6
+  intl: ^0.20.2
+  flutter_dotenv: ^6.0.0
+  uuid: ^4.5.1
+  url_launcher: ^6.3.0
+  mobile_scanner: ^7.2.0
+  clerk_flutter: 0.0.14-beta
+  clerk_auth: 0.0.14-beta
+  flutter_local_notifications: ^19.0.0
+  timezone: ^0.10.0
+  flutter_timezone: ^4.1.0
+  home_widget: ^0.7.0+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: code/app_icon.png
+  adaptive_icon_background: "#F8FAF9"
+  adaptive_icon_foreground: code/app_icon.png
+  min_sdk_android: 24
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env

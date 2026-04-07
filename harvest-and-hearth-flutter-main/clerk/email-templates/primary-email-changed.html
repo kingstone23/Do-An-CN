@@ -1,0 +1,36 @@
+<!-- Revolvapp (Clerk). Backlog: bật "Primary email changed"; thêm biến email từ Variable nếu có. -->
+<re-html>
+<re-head>
+    <re-title>Email chính đã thay đổi — {{app.name}}</re-title>
+</re-head>
+<re-body background-color="#F0F5F1" padding="48px 32px 48px 32px">
+    <re-preheader>Địa chỉ email đăng nhập chính cho {{app.name}} vừa được cập nhật.</re-preheader>
+    <re-header padding="16px 32px 8px 32px">
+        <re-text font-size="18px" font-weight="bold" line-height="26px" color="#1B5E20">
+            {{> app_logo}}
+        </re-text>
+    </re-header>
+    <re-main background-color="#ffffff" border-radius="12px">
+        <re-block border-radius="12px" align="left" padding="32px 32px 48px 32px" background-color="#ffffff" font-size="14px" font-weight="normal" margin="16px 0px 0px 0px">
+            <re-heading level="h1" align="left" color="#1B5E20" font-size="24px" line-height="32px">
+                Email chính đã được thay đổi
+            </re-heading>
+            <re-text margin="16px 0px 0px 0px" align="left" font-size="14px" color="#546E7A" padding="15px 0px">
+                Địa chỉ email đăng nhập chính cho tài khoản <strong>{{app.name}}</strong> vừa được cập nhật.
+            </re-text>
+            <re-text margin="16px 0px 0px 0px" align="left" font-size="14px" color="#37474F" padding="15px 0px">
+                Nếu bạn <strong>không</strong> thực hiện thay đổi này, hãy bảo vệ tài khoản ngay (đặt lại mật khẩu, liên hệ hỗ trợ).
+            </re-text>
+            <re-button padding="12px 20px" href="{{action_url}}" font-size="14px" font-weight="bold" border-radius="8px" margin="32px 0px 0px 0px" background-color="#2E7D32" color="#ffffff">
+                Kiểm tra tài khoản
+            </re-button>
+        </re-block>
+    </re-main>
+    <re-footer padding="24px 32px 48px">
+        <re-divider background-color="#C8E6C9" height="1px"></re-divider>
+        <re-text margin="16px 0px 0px 0px" font-size="13px" color="#78909C">
+            © {{current_year}} {{app.name}} · {{app.domain_name}}
+        </re-text>
+    </re-footer>
+</re-body>
+</re-html>

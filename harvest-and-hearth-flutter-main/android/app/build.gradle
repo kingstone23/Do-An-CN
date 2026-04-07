@@ -1,0 +1,81 @@
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+// Nhãn b0.x.x mới nhất trong CHANGELOG.md (mục ## [b0.x.x] cuối file).
+def getChangelogLabel() {
+    def changelogFile = file("${rootProject.projectDir.parentFile}/CHANGELOG.md")
+    if (!changelogFile.exists()) {
+        return "b0.0.0"
+    }
+    def text = changelogFile.getText("UTF-8")
+    def matcher = text =~ /## \[(b0\.\d+\.\d+)\]/
+    def labels = []
+    while (matcher.find()) {
+        labels.add(matcher.group(1))
+    }
+    return labels.isEmpty() ? "b0.0.0" : labels.last()
+}
+
+def changelogLabel = getChangelogLabel()
+
+android {
+    namespace "com.harvestandhearth.app"
+    compileSdk 36
+    ndkVersion flutter.ndkVersion
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    defaultConfig {
+        applicationId "com.harvestandhearth.app"
+        minSdk 24
+        targetSdk 36
+        versionCode flutter.versionCode
+        versionName flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+        }
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+}
+
+flutter {
+    source '../..'
+}
+
+// Sau khi build release: thêm bản copy đặt tên harvestnhearth-<changelog>.apk (giữ nguyên app-release.apk).
+tasks.whenTaskAdded { t ->
+    if (t.name == "assembleRelease") {
+        t.doLast {
+            def flutterRoot = rootProject.projectDir.parentFile
+            def outDir = file("${flutterRoot}/build/app/outputs/flutter-apk")
+            def src = file("${outDir}/app-release.apk")
+            def dst = file("${outDir}/harvestnhearth-${changelogLabel}.apk")
+            if (src.exists()) {
+                Files.copy(src.toPath(), dst.toPath(), StandardCopyOption.REPLACE_EXISTING)
+                println "APK copy: ${dst.name}"
+            } else {
+                println "APK rename skipped (source missing): ${src}"
+            }
+        }
+    }
+}

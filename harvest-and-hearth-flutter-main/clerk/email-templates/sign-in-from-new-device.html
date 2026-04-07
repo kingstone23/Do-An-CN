@@ -1,0 +1,37 @@
+<!-- Revolvapp (Clerk). Backlog: bật "Sign in from new device"; thêm biến thiết bị/IP từ Variable khi có. -->
+<re-html>
+<re-head>
+    <re-title>Đăng nhập mới — {{app.name}}</re-title>
+</re-head>
+<re-body background-color="#F0F5F1" padding="48px 32px 48px 32px">
+    <re-preheader>Đăng nhập tài khoản {{app.name}} từ môi trường mới.</re-preheader>
+    <re-header padding="16px 32px 8px 32px">
+        <re-text font-size="18px" font-weight="bold" line-height="26px" color="#1B5E20">
+            {{> app_logo}}
+        </re-text>
+    </re-header>
+    <re-main background-color="#ffffff" border-radius="12px">
+        <re-block border-radius="12px" align="left" padding="32px 32px 48px 32px" background-color="#ffffff" font-size="14px" font-weight="normal" margin="16px 0px 0px 0px">
+            <re-heading level="h1" align="left" color="#1B5E20" font-size="24px" line-height="32px">
+                Đăng nhập từ thiết bị hoặc vị trí mới
+            </re-heading>
+            <re-text margin="16px 0px 0px 0px" align="left" font-size="14px" color="#546E7A" padding="15px 0px">
+                Tài khoản <strong>{{app.name}}</strong> của bạn vừa được sử dụng để đăng nhập từ một môi trường mới (thiết bị, trình duyệt hoặc địa điểm khác thường lệ).
+            </re-text>
+            <re-text margin="16px 0px 0px 0px" align="left" font-size="14px" color="#2E7D32" padding="15px 0px">
+                <strong>Bạn vừa đăng nhập?</strong> Bạn có thể bỏ qua email này.<br/>
+                <strong>Không phải bạn?</strong> Hãy đặt lại mật khẩu và kiểm tra bảo mật tài khoản ngay.
+            </re-text>
+            <re-button padding="12px 20px" href="{{action_url}}" font-size="14px" font-weight="bold" border-radius="8px" margin="32px 0px 0px 0px" background-color="#2E7D32" color="#ffffff">
+                Xem hoạt động tài khoản
+            </re-button>
+        </re-block>
+    </re-main>
+    <re-footer padding="24px 32px 48px">
+        <re-divider background-color="#C8E6C9" height="1px"></re-divider>
+        <re-text margin="16px 0px 0px 0px" font-size="13px" color="#78909C">
+            © {{current_year}} {{app.name}} · {{app.domain_name}}
+        </re-text>
+    </re-footer>
+</re-body>
+</re-html>

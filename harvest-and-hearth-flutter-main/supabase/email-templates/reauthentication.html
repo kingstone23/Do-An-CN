@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Xác thực lại – Harvest & Hearth</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F0F5F1;font-family:'Segoe UI',Arial,sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F0F5F1;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+
+          <!-- LOGO HEADER -->
+          <tr>
+            <td align="center" style="padding-bottom:28px;">
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background:linear-gradient(135deg,#2E7D32 0%,#43A047 100%);border-radius:20px;padding:18px 28px;text-align:center;">
+                    <div style="font-size:32px;margin-bottom:4px;">🌿</div>
+                    <div style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:0.5px;line-height:1.2;">
+                      Harvest &amp; Hearth
+                    </div>
+                    <div style="font-size:11px;color:#A5D6A7;letter-spacing:2px;text-transform:uppercase;margin-top:4px;">
+                      Smart Food Management
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- MAIN CARD -->
+          <tr>
+            <td style="background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(46,125,50,0.10);">
+
+              <!-- TOP ACCENT BAR -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background:linear-gradient(90deg,#E65100,#FF9800,#FFB74D);height:5px;"></td>
+                </tr>
+              </table>
+
+              <!-- CONTENT -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:44px 48px 40px;">
+
+                    <!-- Icon -->
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="center" style="padding-bottom:24px;">
+                          <div style="width:72px;height:72px;background:linear-gradient(135deg,#FFF3E0,#FFE0B2);border-radius:50%;display:inline-block;line-height:72px;text-align:center;font-size:34px;">
+                            🔐
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Heading -->
+                    <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#E65100;text-align:center;line-height:1.3;">
+                      Mã xác thực của bạn
+                    </h1>
+                    <p style="margin:0 0 32px;font-size:15px;color:#546E7A;text-align:center;line-height:1.7;">
+                      Chúng tôi nhận được yêu cầu xác thực lại cho tài khoản<br/>
+                      <strong style="color:#2E7D32;">{{ .Email }}</strong>
+                    </p>
+
+                    <!-- OTP Box -->
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="center" style="padding-bottom:32px;">
+                          <table cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="background:linear-gradient(135deg,#FFF8E1,#FFF3E0);border:2px solid #FF9800;border-radius:16px;padding:24px 48px;text-align:center;">
+                                <p style="margin:0 0 8px;font-size:12px;color:#FF9800;font-weight:700;letter-spacing:3px;text-transform:uppercase;">
+                                  Mã OTP
+                                </p>
+                                <p style="margin:0;font-size:42px;font-weight:900;color:#E65100;letter-spacing:10px;line-height:1.1;font-family:'Courier New',monospace;">
+                                  {{ .Token }}
+                                </p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Expiry notice -->
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="center" style="padding-bottom:28px;">
+                          <table cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="background:#E8F5E9;border-radius:50px;padding:8px 20px;">
+                                <p style="margin:0;font-size:13px;color:#2E7D32;font-weight:600;">
+                                  ⏱ &nbsp;Mã có hiệu lực trong <strong>10 phút</strong>
+                                </p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Divider -->
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="border-top:1px solid #F3E5F5;padding-top:28px;">
+
+                          <!-- Warning box -->
+                          <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="background:#FFF3E0;border-left:4px solid #E65100;border-radius:0 10px 10px 0;padding:14px 18px;">
+                                <p style="margin:0;font-size:13px;color:#5D4037;line-height:1.6;">
+                                  ⚠️ <strong>Không chia sẻ mã này</strong> với bất kỳ ai. Harvest &amp; Hearth
+                                  sẽ không bao giờ hỏi mã OTP của bạn qua điện thoại hay email khác.
+                                </p>
+                              </td>
+                            </tr>
+                          </table>
+
+                          <!-- Not requested -->
+                          <p style="margin:20px 0 0;font-size:13px;color:#90A4AE;text-align:center;line-height:1.7;">
+                            Bạn không yêu cầu mã này? Hãy bỏ qua email này.<br/>
+                            Tài khoản của bạn vẫn an toàn.
+                          </p>
+
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td style="padding:28px 16px 8px;text-align:center;">
+              <p style="margin:0 0 6px;font-size:12px;color:#90A4AE;">
+                © 2025 Harvest &amp; Hearth · Quản lý thực phẩm thông minh
+              </p>
+              <p style="margin:0;font-size:11px;color:#B0BEC5;">
+                Đây là email tự động, vui lòng không trả lời.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# New Blueprint → chọn repo có file này; điền MONGODB_URI và CLERK_SECRET_KEY trong dashboard sau khi tạo.
+
+services:
+  - type: web
+    name: harvest-hearth-api
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    healthCheckPath: /health
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false

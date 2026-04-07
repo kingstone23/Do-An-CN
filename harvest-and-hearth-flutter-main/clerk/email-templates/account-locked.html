@@ -1,0 +1,39 @@
+<!-- Revolvapp (Clerk). Backlog: bật "Account locked" trên Dashboard khi triển khai. -->
+<re-html>
+<re-head>
+    <re-title>Tài khoản bị khóa — {{app.name}}</re-title>
+</re-head>
+<re-body background-color="#F0F5F1" padding="48px 32px 48px 32px">
+    <re-preheader>Tài khoản {{app.name}} đã bị khóa hoặc tạm ngưng đăng nhập.</re-preheader>
+    <re-header padding="16px 32px 8px 32px">
+        <re-text font-size="18px" font-weight="bold" line-height="26px" color="#1B5E20">
+            {{> app_logo}}
+        </re-text>
+    </re-header>
+    <re-main background-color="#ffffff" border-radius="12px">
+        <re-block border-radius="12px" align="left" padding="32px 32px 48px 32px" background-color="#ffffff" font-size="14px" font-weight="normal" margin="16px 0px 0px 0px">
+            <re-heading level="h1" align="left" color="#B71C1C" font-size="24px" line-height="32px">
+                Tài khoản tạm khóa
+            </re-heading>
+            <re-text margin="16px 0px 0px 0px" align="left" font-size="14px" color="#546E7A" padding="15px 0px">
+                Vì lý do bảo mật, tài khoản <strong>{{app.name}}</strong> của bạn đã bị khóa hoặc tạm ngưng đăng nhập.
+            </re-text>
+            <re-text margin="16px 0px 0px 0px" align="left" font-size="14px" color="#78909C" padding="15px 0px">
+                Nếu đây là nhầm lẫn, hãy làm theo hướng dẫn trên trang hỗ trợ hoặc liên hệ quản trị viên.
+            </re-text>
+            <re-button padding="12px 20px" href="{{action_url}}" font-size="14px" font-weight="bold" border-radius="8px" margin="32px 0px 0px 0px" background-color="#2E7D32" color="#ffffff">
+                Tiếp tục / Khôi phục tài khoản
+            </re-button>
+            <re-text margin="16px 0px 0px 0px" font-size="12px" color="#90A4AE" align="center">
+                {{action_url}}
+            </re-text>
+        </re-block>
+    </re-main>
+    <re-footer padding="24px 32px 48px">
+        <re-divider background-color="#C8E6C9" height="1px"></re-divider>
+        <re-text margin="16px 0px 0px 0px" font-size="13px" color="#78909C">
+            © {{current_year}} {{app.name}} · {{app.domain_name}}
+        </re-text>
+    </re-footer>
+</re-body>
+</re-html>

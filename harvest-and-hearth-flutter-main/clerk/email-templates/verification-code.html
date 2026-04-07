@@ -1,0 +1,39 @@
+<re-html>
+<re-head>
+    <re-title>
+        Mã xác thực {{app.name}}
+    </re-title>
+</re-head>
+<re-body background-color="#F0F5F1" padding="48px 32px 48px 32px">
+    <re-preheader>
+        Mã xác thực một lần cho {{app.name}}
+    </re-preheader>
+    <re-header padding="16px 32px 8px 32px">
+        <re-text font-size="18px" font-weight="bold" line-height="26px" color="#1B5E20">
+            {{> app_logo}}
+        </re-text>
+    </re-header>
+    <re-main background-color="#ffffff" border-radius="12px">
+        <re-block border-radius="12px" align="left" padding="32px 32px 48px 32px" background-color="#ffffff" font-size="14px" font-weight="normal" margin="16px 0px 0px 0px">
+            <re-heading level="h1" align="left" color="#1B5E20" font-size="24px" line-height="32px">
+                Mã xác thực của bạn
+            </re-heading>
+            <re-text margin="16px 0px 0px 0px" align="left" font-size="14px" color="#546E7A" padding="15px 0px">
+                Nhập mã sau trên màn hình đăng nhập hoặc đăng ký {{app.name}}. Mã có thời hạn ngắn.
+            </re-text>
+            <re-text margin="24px 0px 0px 0px" align="center" font-size="32px" font-weight="bold" letter-spacing="8px" color="#1B5E20">
+                {{{otp_code}}}
+            </re-text>
+            <re-text margin="20px 0px 0px 0px" align="left" font-size="13px" color="#546E7A" padding="15px 0px">
+                Không chia sẻ mã này. {{app.name}} sẽ không bao giờ hỏi mã qua email hay chat.
+            </re-text>
+        </re-block>
+    </re-main>
+    <re-footer padding="24px 32px 48px">
+        <re-divider background-color="#C8E6C9" height="1px"></re-divider>
+        <re-text margin="16px 0px 0px 0px" font-size="13px" color="#78909C">
+            © {{current_year}} {{app.name}}
+        </re-text>
+    </re-footer>
+</re-body>
+</re-html>

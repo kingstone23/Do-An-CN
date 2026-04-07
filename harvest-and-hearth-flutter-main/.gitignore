@@ -1,0 +1,69 @@
+# === TÀI LIỆU NỘI BỘ ===
+AI.md
+RULES.md
+
+# === BẢO MẬT - KHÔNG BAO GIỜ COMMIT ===
+.env
+*.key
+*.pem
+*.p12
+*.keystore
+google-services.json
+GoogleService-Info.plist
+
+# === Flutter / Dart ===
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+
+# === Android ===
+android/.gradle/
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/key.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+**/android/**/gradle-wrapper.jar
+
+# === iOS ===
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Flutter/app.flx
+ios/Flutter/app.zip
+ios/Flutter/flutter_assets/
+ios/ServiceDefinitions.json
+ios/Runner/GeneratedPluginRegistrant.*
+
+# === IDE ===
+.idea/
+*.iws
+*.ipr
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# === macOS ===
+.DS_Store
+
+# === Windows ===
+Thumbs.db
+desktop.ini
+
+# === Logs ===
+*.log

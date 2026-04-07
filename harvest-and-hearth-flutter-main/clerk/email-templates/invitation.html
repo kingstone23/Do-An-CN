@@ -1,0 +1,42 @@
+<re-html>
+<re-head>
+    <re-title>
+        Lời mời tới {{app.name}}
+    </re-title>
+</re-head>
+<re-body background-color="#F0F5F1" padding="48px 32px 48px 32px">
+    <re-preheader>
+        Lời mời tới {{app.name}}
+    </re-preheader>
+    <re-header padding="16px 32px 8px 32px">
+        <re-text font-size="18px" font-weight="bold" line-height="26px" color="#1B5E20">
+            {{> app_logo}}
+        </re-text>
+    </re-header>
+    <re-main background-color="#ffffff" border-radius="12px">
+        <re-block border-radius="12px" align="left" padding="32px 32px 48px 32px" background-color="#ffffff" font-size="14px" font-weight="normal" margin="16px 0px 0px 0px">
+            <re-heading level="h1" align="left" color="#1B5E20" font-size="24px" line-height="32px">
+                Lời mời tham gia
+            </re-heading>
+            <re-text margin="16px 0px 0px 0px" align="left" font-size="14px" color="#546E7A" padding="15px 0px">
+                {{#if inviter_name}}{{escapeURIs inviter_name}} đã mời bạn tham gia cùng trên {{app.name}}.{{else}}Bạn được mời tham gia {{app.name}}.{{/if}}
+            </re-text>
+            <re-text margin="16px 0px 0px 0px" align="left" font-size="14px" color="#546E7A" padding="15px 0px">
+                Lời mời sẽ hết hạn sau {{invitation.expires_in_days}} ngày.<br>
+            </re-text>
+            <re-button padding="12px 20px" href="{{action_url}}" font-size="14px" font-weight="bold" border-radius="8px" margin="32px 0px 0px 0px" background-color="#2E7D32" color="#ffffff">
+                Chấp nhận lời mời
+            </re-button>
+            <re-text margin="16px 0px 0px 0px" font-size="14px" color="#546E7A">
+                Nếu nút không hoạt động, <a href="{{action_url}}" style="text-decoration: underline; color: #2E7D32;">nhấn vào đây</a>.
+            </re-text>
+        </re-block>
+    </re-main>
+    <re-footer padding="24px 32px 48px">
+        <re-divider background-color="#C8E6C9" height="1px"></re-divider>
+        <re-text margin="16px 0px 0px 0px" font-size="13px" color="#78909C">
+            © {{current_year}} {{app.name}} · Harvest &amp; Hearth
+        </re-text>
+    </re-footer>
+</re-body>
+</re-html>
