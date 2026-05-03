@@ -24,7 +24,7 @@ class _InventoryScreenState extends State<InventoryScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _searchCtrl.addListener(() {
       setState(() => _query = _searchCtrl.text.toLowerCase());
     });
@@ -51,7 +51,7 @@ class _InventoryScreenState extends State<InventoryScreen>
           if (da == null && db == null) return 0;
           if (da == null) return 1;
           if (db == null) return -1;
-          return da.compareTo(db);
+          return da.compareTo(db); // Đồ gần hết hạn (ít ngày) lên trên
         });
       case _SortBy.added:
         result.sort((a, b) => b.addedDate.compareTo(a.addedDate));
@@ -75,17 +75,18 @@ class _InventoryScreenState extends State<InventoryScreen>
   Widget build(BuildContext context) {
     // Use select to avoid rebuilding when unrelated provider fields change
     // (e.g. recipeCache, savedRecipes)
-    final fridgeItems = context.select<AppProvider, List<FoodItem>>(
-        (p) => p.fridgeItems);
-    final freezerItems = context.select<AppProvider, List<FoodItem>>(
-        (p) => p.freezerItems);
-    final language =
-        context.select<AppProvider, String>((p) => p.language);
-    final t = context.select<AppProvider, String Function(String)>(
-        (p) => p.t);
+    final fridgeItems =
+        context.select<AppProvider, List<FoodItem>>((p) => p.fridgeItems);
+    final freezerItems =
+        context.select<AppProvider, List<FoodItem>>((p) => p.freezerItems);
+    final pantryItems =
+        context.select<AppProvider, List<FoodItem>>((p) => p.pantryItems);
+    final language = context.select<AppProvider, String>((p) => p.language);
+    final t = context.select<AppProvider, String Function(String)>((p) => p.t);
 
     final filteredFridge = _filter(fridgeItems);
     final filteredFreezer = _filter(freezerItems);
+    final filteredPantry = _filter(pantryItems);
 
     return Scaffold(
       appBar: AppBar(
@@ -135,6 +136,10 @@ class _InventoryScreenState extends State<InventoryScreen>
                           icon: const Icon(Icons.ac_unit_rounded, size: 18),
                           text: t('inventory_freezer'),
                         ),
+                        Tab(
+                          icon: const Icon(Icons.inventory_2_rounded, size: 18),
+                          text: t('inventory_pantry'),
+                        ),
                       ],
                     ),
                   ),
@@ -177,6 +182,12 @@ class _InventoryScreenState extends State<InventoryScreen>
             language: language,
             onEdit: (item) => _openEdit(context, item),
           ),
+          _ItemList(
+            items: filteredPantry,
+            t: t,
+            language: language,
+            onEdit: (item) => _openEdit(context, item),
+          ),
         ],
       ),
     );
@@ -204,8 +215,7 @@ class _ItemList extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.kitchen_outlined,
-                size: 64,
-                color: Theme.of(context).colorScheme.outlineVariant),
+                size: 64, color: Theme.of(context).colorScheme.outlineVariant),
             const SizedBox(height: 16),
             Text(t('inventory_empty'),
                 style: Theme.of(context).textTheme.titleMedium),

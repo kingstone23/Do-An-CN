@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../models/food_item.dart';
 import '../constants/categories.dart';
@@ -42,15 +44,24 @@ class FoodItemCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Category icon
+              // Image or category icon
               Container(
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: info.color.withAlpha(26),
+                  color:
+                      item.imagePath != null ? null : info.color.withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
+                  image: item.imagePath != null
+                      ? DecorationImage(
+                          image: FileImage(File(item.imagePath!)),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                child: Icon(info.icon, color: info.color, size: 22),
+                child: item.imagePath == null
+                    ? Icon(info.icon, color: info.color, size: 22)
+                    : null,
               ),
               const SizedBox(width: 12),
 
@@ -70,9 +81,13 @@ class FoodItemCard extends StatelessWidget {
                           ),
                         ),
                         if (isExpired)
-                          _Badge(label: language == 'VIE' ? 'Hết hạn' : 'Expired', color: Colors.red)
+                          _Badge(
+                              label: language == 'VIE' ? 'Hết hạn' : 'Expired',
+                              color: Colors.red)
                         else if (isSoon)
-                          _Badge(label: language == 'VIE' ? 'Sắp hết' : 'Expiring', color: Colors.orange),
+                          _Badge(
+                              label: language == 'VIE' ? 'Sắp hết' : 'Expiring',
+                              color: Colors.orange),
                       ],
                     ),
                     const SizedBox(height: 3),
@@ -99,8 +114,7 @@ class FoodItemCard extends StatelessWidget {
                         Text(
                           '${_formatQty(item.quantity)} ${item.unit}',
                           style: TextStyle(
-                              fontSize: 12,
-                              color: cs.onSurfaceVariant),
+                              fontSize: 12, color: cs.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -115,8 +129,7 @@ class FoodItemCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             DateHelper.format(item.expiryDate!),
-                            style: TextStyle(
-                                fontSize: 11, color: statusColor),
+                            style: TextStyle(fontSize: 11, color: statusColor),
                           ),
                           const SizedBox(width: 6),
                           if (days != null)

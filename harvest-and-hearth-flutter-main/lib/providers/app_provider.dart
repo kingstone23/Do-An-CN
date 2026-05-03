@@ -251,6 +251,9 @@ class AppProvider extends ChangeNotifier {
   List<FoodItem> get freezerItems =>
       _inventory.where((e) => e.storage == StorageType.freezer).toList();
 
+  List<FoodItem> get pantryItems =>
+      _inventory.where((e) => e.storage == StorageType.pantry).toList();
+
   List<FoodItem> get expiredItems =>
       _inventory.where((e) => e.isExpired).toList();
 

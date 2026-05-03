@@ -45,6 +45,7 @@ class Translations {
     'inventory_title': 'Kho thực phẩm',
     'inventory_fridge': 'Tủ lạnh',
     'inventory_freezer': 'Ngăn đông',
+    'inventory_pantry': 'Tủ đồ khô',
     'inventory_search': 'Tìm kiếm...',
     'inventory_empty': 'Không có thực phẩm nào',
     'inventory_empty_sub': 'Nhấn + để thêm thực phẩm mới',
@@ -71,6 +72,9 @@ class Translations {
     'food_expiry': 'Ngày hết hạn (tuỳ chọn)',
     'food_warning_days': 'Cảnh báo trước (ngày)',
     'food_barcode': 'Quét mã vạch / QR',
+    'food_add_image': 'Thêm ảnh',
+    'food_image_camera': 'Chụp ảnh',
+    'food_image_gallery': 'Chọn từ thư viện',
     'food_save': 'Lưu',
     'food_cancel': 'Hủy',
     'food_name_required': 'Tên thực phẩm không được để trống',
@@ -95,6 +99,7 @@ class Translations {
     // Storage
     'storage_fridge': 'Tủ lạnh',
     'storage_freezer': 'Ngăn đông',
+    'storage_pantry': 'Tủ đồ khô',
 
     // Recipes
     'recipes_title': 'Công thức nấu ăn',
@@ -238,6 +243,7 @@ class Translations {
     'inventory_title': 'Food Inventory',
     'inventory_fridge': 'Fridge',
     'inventory_freezer': 'Freezer',
+    'inventory_pantry': 'Pantry',
     'inventory_search': 'Search...',
     'inventory_empty': 'No food items',
     'inventory_empty_sub': 'Tap + to add new food',
@@ -264,6 +270,9 @@ class Translations {
     'food_expiry': 'Expiry date (optional)',
     'food_warning_days': 'Warn before (days)',
     'food_barcode': 'Scan barcode / QR',
+    'food_add_image': 'Add image',
+    'food_image_camera': 'Take photo',
+    'food_image_gallery': 'Choose from gallery',
     'food_save': 'Save',
     'food_cancel': 'Cancel',
     'food_name_required': 'Food name is required',
@@ -288,6 +297,7 @@ class Translations {
     // Storage
     'storage_fridge': 'Fridge',
     'storage_freezer': 'Freezer',
+    'storage_pantry': 'Pantry',
 
     // Recipes
     'recipes_title': 'Recipes',

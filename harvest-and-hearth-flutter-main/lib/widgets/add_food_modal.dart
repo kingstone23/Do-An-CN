@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../core/simulated_clock.dart';
@@ -28,10 +31,12 @@ class _AddFoodModalState extends State<AddFoodModal> {
   final _quantityCtrl = TextEditingController();
   final _unitCtrl = TextEditingController();
   final _warningDaysCtrl = TextEditingController();
+  final _imagePicker = ImagePicker();
 
   late FoodCategory _category;
   late StorageType _storage;
   DateTime? _expiryDate;
+  String? _imagePath;
 
   @override
   void initState() {
@@ -39,13 +44,15 @@ class _AddFoodModalState extends State<AddFoodModal> {
     final e = widget.editItem;
     if (e != null) {
       _nameCtrl.text = e.name;
-      _quantityCtrl.text =
-          e.quantity % 1 == 0 ? e.quantity.toInt().toString() : e.quantity.toString();
+      _quantityCtrl.text = e.quantity % 1 == 0
+          ? e.quantity.toInt().toString()
+          : e.quantity.toString();
       _unitCtrl.text = e.unit;
       _warningDaysCtrl.text = (e.warningDays ?? 3).toString();
       _category = e.category;
       _storage = e.storage;
       _expiryDate = e.expiryDate;
+      _imagePath = e.imagePath;
     } else {
       _quantityCtrl.text = '1';
       _unitCtrl.text = 'pcs';
@@ -81,6 +88,66 @@ class _AddFoodModalState extends State<AddFoodModal> {
     }
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final pickedFile = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+      if (pickedFile != null) {
+        setState(() => _imagePath = pickedFile.path);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi chọn ảnh: $e')),
+      );
+    }
+  }
+
+  void _showImageSourceDialog() {
+    final t = context.read<AppProvider>().t;
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: Text(t('food_image_camera')),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: Text(t('food_image_gallery')),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            if (_imagePath != null) ...[
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Xóa ảnh'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  setState(() => _imagePath = null);
+                },
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _pickExpiryDate() async {
     final initial =
         _expiryDate ?? SimulatedClock.now.add(const Duration(days: 7));
@@ -110,6 +177,7 @@ class _AddFoodModalState extends State<AddFoodModal> {
         unit: _unitCtrl.text.trim(),
         expiryDate: _expiryDate,
         warningDays: warningDays,
+        imagePath: _imagePath,
       );
       provider.updateFood(widget.editItem!.id, updated);
     } else {
@@ -123,6 +191,7 @@ class _AddFoodModalState extends State<AddFoodModal> {
         addedDate: SimulatedClock.now,
         expiryDate: _expiryDate,
         warningDays: warningDays,
+        imagePath: _imagePath,
       );
       provider.addFood(item);
     }
@@ -177,6 +246,51 @@ class _AddFoodModalState extends State<AddFoodModal> {
                     onPressed: _openScanner,
                     icon: const Icon(Icons.qr_code_scanner_rounded),
                     label: Text(t('food_barcode')),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Image picker
+                if (_imagePath != null) ...[
+                  Container(
+                    height: 120,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: cs.outline),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            File(_imagePath!),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: IconButton(
+                            onPressed: () => setState(() => _imagePath = null),
+                            icon: const Icon(Icons.close),
+                            style: IconButton.styleFrom(
+                              backgroundColor: cs.surface.withOpacity(0.8),
+                              foregroundColor: cs.onSurface,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ] else ...[
+                  OutlinedButton.icon(
+                    onPressed: _showImageSourceDialog,
+                    icon: const Icon(Icons.add_photo_alternate_rounded),
+                    label: Text(t('food_add_image')),
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -240,6 +354,16 @@ class _AddFoodModalState extends State<AddFoodModal> {
                             setState(() => _storage = StorageType.freezer),
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _StorageChip(
+                        label: t('storage_pantry'),
+                        icon: Icons.inventory_2_rounded,
+                        selected: _storage == StorageType.pantry,
+                        onTap: () =>
+                            setState(() => _storage = StorageType.pantry),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -285,7 +409,8 @@ class _AddFoodModalState extends State<AddFoodModal> {
                           decoration: InputDecoration(
                             labelText: t('food_expiry'),
                             border: const OutlineInputBorder(),
-                            suffixIcon: const Icon(Icons.calendar_month_outlined),
+                            suffixIcon:
+                                const Icon(Icons.calendar_month_outlined),
                           ),
                           child: Text(
                             _expiryDate == null
@@ -332,9 +457,8 @@ class _AddFoodModalState extends State<AddFoodModal> {
                       flex: 2,
                       child: FilledButton(
                         onPressed: _submit,
-                        child: Text(widget._isEdit
-                            ? t('common_save')
-                            : t('food_save')),
+                        child: Text(
+                            widget._isEdit ? t('common_save') : t('food_save')),
                       ),
                     ),
                   ],
@@ -381,15 +505,13 @@ class _StorageChip extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon,
-                color: selected ? cs.primary : cs.onSurfaceVariant,
-                size: 18),
+                color: selected ? cs.primary : cs.onSurfaceVariant, size: 18),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
                 color: selected ? cs.primary : cs.onSurfaceVariant,
-                fontWeight:
-                    selected ? FontWeight.bold : FontWeight.normal,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 13,
               ),
             ),
