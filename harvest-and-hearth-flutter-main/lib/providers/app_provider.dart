@@ -291,6 +291,56 @@ class AppProvider extends ChangeNotifier {
     _recipeCache = recipes;
     notifyListeners();
   }
+  // ── Custom recipes ──────────────────────────────────────────────────────────
+  List<Recipe> _customRecipes = [];
+  List<Recipe> get customRecipes => List.unmodifiable(_customRecipes);
+
+  Future<void> loadCustomRecipes() async {
+    if (!BackendApiService.instance.isConfigured) return;
+    try {
+      final rows = await BackendApiService.instance.getCustomRecipes();
+      _customRecipes = rows.map((r) => Recipe.fromJson(r)).toList();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('loadCustomRecipes: $e');
+    }
+  }
+
+  Future<void> addCustomRecipe(Recipe recipe) async {
+    _customRecipes.insert(0, recipe);
+    notifyListeners();
+    if (!BackendApiService.instance.isConfigured) return;
+    try {
+      await BackendApiService.instance.createCustomRecipe(recipe);
+    } catch (e) {
+      debugPrint('addCustomRecipe: $e');
+    }
+  }
+
+  Future<void> updateCustomRecipe(Recipe recipe) async {
+    final index = _customRecipes.indexWhere((r) => r.id == recipe.id);
+    if (index >= 0) {
+      _customRecipes[index] = recipe;
+      notifyListeners();
+      if (!BackendApiService.instance.isConfigured) return;
+      try {
+        await BackendApiService.instance.updateCustomRecipe(recipe);
+      } catch (e) {
+        debugPrint('updateCustomRecipe: $e');
+      }
+    }
+  }
+
+  Future<void> deleteCustomRecipe(String id) async {
+    _customRecipes.removeWhere((r) => r.id == id);
+    notifyListeners();
+    if (!BackendApiService.instance.isConfigured) return;
+    try {
+      await BackendApiService.instance.deleteCustomRecipe(id);
+    } catch (e) {
+      debugPrint('deleteCustomRecipe: $e');
+    }
+  }
 
   // ── Settings ───────────────────────────────────────────────────────────────
   Future<void> setLanguage(String lang) async {

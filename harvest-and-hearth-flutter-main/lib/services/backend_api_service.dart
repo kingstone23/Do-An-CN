@@ -226,7 +226,46 @@ class BackendApiService {
     );
     _throwIfBad(r);
   }
+  // ── Custom recipes ──────────────────────────────────────────────────────────
+  Future<List<Map<String, dynamic>>> getCustomRecipes() async {
+    final r = await _get(
+      _u('/api/v1/custom-recipes'),
+      headers: await _headers(),
+    );
+    _throwIfBad(r);
+    return _decodeJsonList(r.body);
+  }
+
+  Future<void> createCustomRecipe(Recipe recipe) async {
+    final r = await _post(
+      _u('/api/v1/custom-recipes'),
+      headers: await _headers(),
+      body: jsonEncode(recipe.toJson()),
+    );
+    _throwIfBad(r);
+  }
+
+  Future<void> updateCustomRecipe(Recipe recipe) async {
+    final enc = Uri.encodeComponent(recipe.id);
+    final r = await _put(
+      _u('/api/v1/custom-recipes/$enc'),
+      headers: await _headers(),
+      body: jsonEncode(recipe.toJson()),
+    );
+    _throwIfBad(r);
+  }
+
+  Future<void> deleteCustomRecipe(String id) async {
+    final enc = Uri.encodeComponent(id);
+    final r = await _delete(
+      _u('/api/v1/custom-recipes/$enc'),
+      headers: await _headers(),
+    );
+    _throwIfBad(r);
+  }
 }
+
+
 
 class BackendApiException implements Exception {
   BackendApiException(this.statusCode, this.body);

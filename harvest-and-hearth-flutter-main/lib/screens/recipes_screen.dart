@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'package:uuid/uuid.dart';
+import '../models/food_item.dart';
 import '../providers/app_provider.dart';
 import '../services/ai_service.dart';
 import '../services/recipe_search_service.dart';
@@ -25,7 +26,10 @@ class _RecipesScreenState extends State<RecipesScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AppProvider>().loadCustomRecipes();
+    });
   }
 
   @override
@@ -88,6 +92,10 @@ class _RecipesScreenState extends State<RecipesScreen>
               icon: const Icon(Icons.explore_outlined, size: 18),
               text: t('explore_title'),
             ),
+            Tab(
+              icon: const Icon(Icons.edit_note_rounded, size: 18),
+              text: 'Của tôi',
+            ),
           ],
         ),
       ),
@@ -102,6 +110,7 @@ class _RecipesScreenState extends State<RecipesScreen>
           ),
           _SavedRecipesTab(provider: provider),
           _ExploreTab(provider: provider),
+          _CustomRecipesTab(provider: provider),
         ],
       ),
     );
@@ -941,6 +950,826 @@ class _DdgResultCardState extends State<_DdgResultCard> {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+// ── Custom recipes tab ────────────────────────────────────────────────────────
+
+class _CustomRecipesTab extends StatefulWidget {
+  final AppProvider provider;
+  const _CustomRecipesTab({required this.provider});
+
+  @override
+  State<_CustomRecipesTab> createState() => _CustomRecipesTabState();
+}
+
+class _CustomRecipesTabState extends State<_CustomRecipesTab> {
+  void _showForm({Recipe? recipe}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => _CustomRecipeForm(
+        provider: widget.provider,
+        existing: recipe,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final recipes = widget.provider.customRecipes;
+    final cs = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      body: recipes.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.edit_note_rounded,
+                      size: 64, color: cs.outlineVariant),
+                  const SizedBox(height: 16),
+                  const Text('Chưa có công thức nào',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Text('Nhấn + để tạo công thức của bạn',
+                      style: TextStyle(color: cs.onSurfaceVariant)),
+                ],
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              itemCount: recipes.length,
+              itemBuilder: (context, i) {
+                final r = recipes[i];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: ListTile(
+                    title: Text(r.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(
+                        '${r.prepTime + r.cookTime} phút • ${r.servings} người • ${r.calories} kcal'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit_rounded),
+                          onPressed: () => _showForm(recipe: r),
+                        ),
+                        IconButton(
+                          icon:
+                              Icon(Icons.delete_rounded, color: cs.error),
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                title: const Text('Xóa công thức?'),
+                                content: Text(
+                                    'Bạn có chắc muốn xóa "${r.name}"?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
+                                    child: const Text('Hủy'),
+                                  ),
+                                  FilledButton(
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
+                                    child: const Text('Xóa'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirm == true && context.mounted) {
+                              widget.provider.deleteCustomRecipe(r.id);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    onTap: () => _showDetailSheet(r),
+                  ),
+                );
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showForm(),
+        child: const Icon(Icons.add_rounded),
+      ),
+    );
+  }
+
+  void _showDetailSheet(Recipe recipe) {
+    final provider = widget.provider;
+    final cs = Theme.of(context).colorScheme;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 1.0,
+        expand: false,
+        builder: (_, ctrl) => ListView(
+          controller: ctrl,
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: cs.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(recipe.name,
+                style: const TextStyle(
+                    fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text(recipe.description,
+                style: TextStyle(color: cs.onSurfaceVariant)),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              children: [
+                Chip(label: Text('${recipe.prepTime + recipe.cookTime} phút')),
+                Chip(label: Text('${recipe.servings} người')),
+                Chip(label: Text('${recipe.calories} kcal')),
+                Chip(label: Text(recipe.difficulty.value)),
+              ],
+            ),
+            const Divider(height: 24),
+            const Text('Nguyên liệu',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            ...recipe.customIngredients.map((ing) {
+              final inventory = provider.inventory;
+              final foodItem = ing.foodItemId.isNotEmpty
+                  ? inventory.firstWhere(
+                      (f) => f.id == ing.foodItemId,
+                      orElse: () => inventory.first,
+                    )
+                  : null;
+              final hasEnough = foodItem != null &&
+                  foodItem.quantity >= ing.quantityNeeded;
+              final notInStock = ing.foodItemId.isEmpty;
+              return Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(ing.name,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
+                            Text(
+                              notInStock
+                                  ? '${ing.quantityNeeded} ${ing.unit} • Không có trong kho'
+                                  : '${ing.quantityNeeded} ${ing.unit} • Kho: ${foodItem!.quantity} ${foodItem.unit}',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: cs.onSurfaceVariant),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        notInStock
+                            ? Icons.warning_amber_rounded
+                            : hasEnough
+                                ? Icons.check_circle_rounded
+                                : Icons.cancel_rounded,
+                        color: notInStock
+                            ? Colors.orange
+                            : hasEnough
+                                ? Colors.green
+                                : cs.error,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+            const SizedBox(height: 16),
+            const Text('Các bước thực hiện',
+                style:
+                    TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            ...recipe.instructions.asMap().entries.map((e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: cs.primaryContainer,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text('${e.key + 1}',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: cs.onPrimaryContainer)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text(e.value)),
+                    ],
+                  ),
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Custom recipe form ────────────────────────────────────────────────────────
+
+class _CustomRecipeForm extends StatefulWidget {
+  final AppProvider provider;
+  final Recipe? existing;
+  const _CustomRecipeForm({required this.provider, this.existing});
+
+  @override
+  State<_CustomRecipeForm> createState() => _CustomRecipeFormState();
+}
+
+class _CustomRecipeFormState extends State<_CustomRecipeForm> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _descCtrl;
+  late final TextEditingController _prepCtrl;
+  late final TextEditingController _cookCtrl;
+  late final TextEditingController _servingsCtrl;
+  late final TextEditingController _caloriesCtrl;
+  late final TextEditingController _ingredientsCtrl;
+  late final TextEditingController _instructionsCtrl;
+  RecipeDifficulty _difficulty = RecipeDifficulty.easy;
+  bool _saving = false;
+  List<RecipeIngredient> _selectedIngredients = [];
+
+  @override
+  void initState() {
+    super.initState();
+    final r = widget.existing;
+    _nameCtrl = TextEditingController(text: r?.name ?? '');
+    _descCtrl = TextEditingController(text: r?.description ?? '');
+    _prepCtrl = TextEditingController(text: r?.prepTime.toString() ?? '0');
+    _cookCtrl = TextEditingController(text: r?.cookTime.toString() ?? '0');
+    _servingsCtrl =
+        TextEditingController(text: r?.servings.toString() ?? '2');
+    _caloriesCtrl =
+        TextEditingController(text: r?.calories.toString() ?? '0');
+    _ingredientsCtrl = TextEditingController(
+        text: r?.ingredientsNeeded.join('\n') ?? '');
+    _instructionsCtrl =
+        TextEditingController(text: r?.instructions.join('\n') ?? '');
+    _difficulty = r?.difficulty ?? RecipeDifficulty.easy;
+    _selectedIngredients = List.from(r?.customIngredients ?? []);
+  }
+  
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _descCtrl.dispose();
+    _prepCtrl.dispose();
+    _cookCtrl.dispose();
+    _servingsCtrl.dispose();
+    _caloriesCtrl.dispose();
+    _ingredientsCtrl.dispose();
+    _instructionsCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _saving = true);
+
+    final recipe = Recipe(
+      id: widget.existing?.id ?? const Uuid().v4(),
+      name: _nameCtrl.text.trim(),
+      description: _descCtrl.text.trim(),
+      difficulty: _difficulty,
+      prepTime: int.tryParse(_prepCtrl.text) ?? 0,
+      cookTime: int.tryParse(_cookCtrl.text) ?? 0,
+      servings: int.tryParse(_servingsCtrl.text) ?? 2,
+      calories: int.tryParse(_caloriesCtrl.text) ?? 0,
+      ingredientsNeeded: _ingredientsCtrl.text
+          .split('\n')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList(),
+      instructions: _instructionsCtrl.text
+          .split('\n')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList(),
+      sourceName: 'Custom',
+      sourceUrl: '',
+      imageKeyword: '',
+      customIngredients: _selectedIngredients,
+    );
+
+    if (widget.existing != null) {
+      await widget.provider.updateCustomRecipe(recipe);
+    } else {
+      await widget.provider.addCustomRecipe(recipe);
+    }
+
+    if (mounted) Navigator.pop(context);
+  }
+
+  void _showEditIngredientDialog(int index, RecipeIngredient ing) {
+    final qtyCtrl = TextEditingController(
+        text: ing.quantityNeeded.toString());
+    final nameCtrl = TextEditingController(text: ing.name);
+    final unitCtrl = TextEditingController(text: ing.unit);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sửa nguyên liệu'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Tên nguyên liệu',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: qtyCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Số lượng cần',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: unitCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Đơn vị',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            onPressed: () {
+              setState(() {
+                _selectedIngredients[index] = RecipeIngredient(
+                  foodItemId: ing.foodItemId,
+                  name: nameCtrl.text.trim(),
+                  quantityNeeded: double.tryParse(qtyCtrl.text) ?? ing.quantityNeeded,
+                  unit: unitCtrl.text.trim(),
+                );
+              });
+              Navigator.pop(ctx);
+            },
+            child: const Text('Lưu'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddIngredientDialog() {
+    final inventory = widget.provider.inventory;
+    final nameCtrl = TextEditingController();
+    final qtyCtrl = TextEditingController(text: '1');
+    final unitCtrl = TextEditingController();
+    FoodItem? matchedItem;
+    List<FoodItem> suggestions = [];
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Thêm nguyên liệu'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Nhập tên
+                TextFormField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Tên nguyên liệu',
+                    border: OutlineInputBorder(),
+                    hintText: 'VD: Trứng gà, Cà chua...',
+                  ),
+                  onChanged: (val) {
+                    final q = val.trim().toLowerCase();
+                    setDialogState(() {
+                      matchedItem = null;
+                      if (q.isEmpty) {
+                        suggestions = [];
+                      } else {
+                        suggestions = inventory
+                            .where((f) =>
+                                f.name.toLowerCase().contains(q))
+                            .toList();
+                      }
+                    });
+                  },
+                ),
+
+                // Gợi ý từ kho
+                if (suggestions.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  const Text('Có trong kho:',
+                      style: TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  ...suggestions.map((f) => InkWell(
+                        onTap: () => setDialogState(() {
+                          matchedItem = f;
+                          nameCtrl.text = f.name;
+                          unitCtrl.text = f.unit;
+                          suggestions = [];
+                        }),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          margin: const EdgeInsets.only(bottom: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                                color: Colors.green.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.inventory_2_outlined,
+                                  size: 16, color: Colors.green),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '${f.name} — ${f.quantity} ${f.unit} trong kho',
+                                  style: const TextStyle(fontSize: 13),
+                                ),
+                              ),
+                              const Icon(Icons.add_circle_outline,
+                                  size: 16, color: Colors.green),
+                            ],
+                          ),
+                        ),
+                      )),
+                ],
+
+                // Nếu đã chọn từ kho
+                if (matchedItem != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle_rounded,
+                            color: Colors.green, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Liên kết với kho: ${matchedItem!.name} (${matchedItem!.quantity} ${matchedItem!.unit})',
+                          style: const TextStyle(
+                              fontSize: 12, color: Colors.green),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TextFormField(
+                        controller: qtyCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Số lượng cần',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextFormField(
+                        controller: unitCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Đơn vị',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Hủy'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final name = nameCtrl.text.trim();
+                if (name.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Vui lòng nhập tên nguyên liệu!')),
+                  );
+                  return;
+                }
+                final qty = double.tryParse(qtyCtrl.text) ?? 1.0;
+                final already = matchedItem != null &&
+                    _selectedIngredients
+                        .any((e) => e.foodItemId == matchedItem!.id);
+                if (already) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Nguyên liệu này đã được thêm!')),
+                  );
+                  return;
+                }
+                setState(() {
+                  _selectedIngredients.add(RecipeIngredient(
+                    foodItemId: matchedItem?.id ?? '',
+                    name: name,
+                    quantityNeeded: qty,
+                    unit: unitCtrl.text.trim(),
+                  ));
+                });
+                Navigator.pop(ctx);
+              },
+              child: const Text('Thêm'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEdit = widget.existing != null;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 1.0,
+        expand: false,
+        builder: (_, ctrl) => Form(
+          key: _formKey,
+          child: ListView(
+            controller: ctrl,
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                isEdit ? 'Sửa công thức' : 'Tạo công thức mới',
+                style: const TextStyle(
+                    fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _nameCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Tên công thức *',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Bắt buộc' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _descCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Mô tả',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<RecipeDifficulty>(
+                initialValue: _difficulty,
+                decoration: const InputDecoration(
+                  labelText: 'Độ khó',
+                  border: OutlineInputBorder(),
+                ),
+                items: RecipeDifficulty.values
+                    .map((d) => DropdownMenuItem(
+                          value: d,
+                          child: Text(d.value),
+                        ))
+                    .toList(),
+                onChanged: (v) => setState(() => _difficulty = v!),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _prepCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Chuẩn bị (phút)',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _cookCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Nấu (phút)',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _servingsCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Số người',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _caloriesCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Calo',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // ── Nguyên liệu từ kho đồ ──
+              const Text('Nguyên liệu',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              ..._selectedIngredients.asMap().entries.map((entry) {
+                final _ = entry.key;
+                final ing = entry.value;
+                final cs = Theme.of(context).colorScheme;
+                final inventory = widget.provider.inventory;
+                final foodItem = ing.foodItemId.isNotEmpty
+                    ? inventory.firstWhere(
+                        (f) => f.id == ing.foodItemId,
+                        orElse: () => inventory.first,
+                      )
+                    : null;
+                final hasEnough = foodItem != null &&
+                    foodItem.quantity >= ing.quantityNeeded;
+                final notInStock = ing.foodItemId.isEmpty;
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(ing.name,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              Text(
+                                notInStock
+                                  ? '${ing.quantityNeeded} ${ing.unit} • Không có trong kho'
+                                  : '${ing.quantityNeeded} ${ing.unit} • Kho: ${foodItem!.quantity} ${foodItem.unit}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: cs.onSurfaceVariant),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          notInStock
+                              ? Icons.warning_amber_rounded
+                              : hasEnough
+                                  ? Icons.check_circle_rounded
+                                  : Icons.cancel_rounded,
+                          color: notInStock
+                              ? Colors.orange
+                              : hasEnough
+                                  ? Colors.green
+                                  : cs.error,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit_rounded),
+                          onPressed: () => _showEditIngredientDialog(
+                              entry.key, ing),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete_rounded, color: cs.error),
+                          onPressed: () => setState(
+                              () => _selectedIngredients.removeAt(entry.key)),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+              OutlinedButton.icon(
+                onPressed: () => _showAddIngredientDialog(),
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('Thêm nguyên liệu từ kho'),
+              ),
+              const SizedBox(height: 12),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _instructionsCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Các bước (mỗi dòng 1 bước) *',
+                  border: OutlineInputBorder(),
+                  alignLabelWithHint: true,
+                ),
+                maxLines: 5,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Bắt buộc' : null,
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: _saving ? null : _save,
+                child: _saving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(isEdit ? 'Cập nhật' : 'Lưu công thức'),
+              ),
+            ],
+          ),
         ),
       ),
     );
